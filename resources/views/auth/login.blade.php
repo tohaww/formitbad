@@ -88,16 +88,7 @@
                     <span class="group-hover:text-slate-900">Sign in with Google</span>
                 </a>
 
-                <!-- Domain Restriction Notice -->
-                <div class="p-3.5 bg-slate-50 rounded-xl border border-slate-200/70 text-slate-500 text-[11px] leading-relaxed text-center">
-                    <span class="font-bold text-slate-700 block mb-0.5">Akses Akun Institusi</span>
-                    Gunakan akun Google resmi kampus
-                    @if(config('services.google.allowed_domain'))
-                        (<strong class="text-orange-600 font-mono">&#64;{{ config('services.google.allowed_domain') }}</strong>).
-                    @else
-                        Anda untuk autentikasi cepat.
-                    @endif
-                </div>
+
 
                 @if(app()->environment('local'))
                     <!-- Local Developer Quick Login Option -->
