@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Forms — Dashboard | {{ config('app.name', 'CustomFormBuilder') }}</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -23,9 +24,7 @@
         <!-- Left: Logo & My Forms Brand -->
         <div class="flex items-center gap-4">
             <a href="{{ route('dashboard') }}" class="flex items-center gap-2.5 group">
-                <div class="w-9 h-9 rounded-xl jotform-orange flex items-center justify-center font-black text-white text-base shadow-sm group-hover:scale-105 transition transform">
-                    F
-                </div>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo ITB Ahmad Dahlan" class="w-10 h-10 rounded-xl object-contain shadow-xs group-hover:scale-105 transition transform">
                 <div class="flex items-center gap-2">
                     <span class="font-extrabold text-sm tracking-tight text-white block leading-tight">CustomFormBuilder</span>
                     <span class="text-white/30 hidden sm:inline">|</span>

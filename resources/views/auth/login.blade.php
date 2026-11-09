@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Masuk — CustomFormBuilder | ITB Ahmad Dahlan</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -22,9 +23,7 @@
     <!-- Top Minimal Navigation -->
     <header class="w-full max-w-5xl py-4 flex items-center justify-between">
         <a href="/" class="flex items-center gap-2.5 group">
-            <div class="w-9 h-9 rounded-xl jotform-orange flex items-center justify-center font-black text-white text-base shadow-sm group-hover:scale-105 transition transform">
-                F
-            </div>
+            <img src="{{ asset('images/logo.png') }}" alt="Logo ITB Ahmad Dahlan" class="w-10 h-10 rounded-xl object-contain shadow-xs group-hover:scale-105 transition transform">
             <div>
                 <span class="font-extrabold text-sm tracking-tight text-slate-900 block leading-tight">CustomFormBuilder</span>
                 <span class="text-[10px] text-slate-400 font-semibold tracking-wider uppercase block">ITB Ahmad Dahlan</span>
@@ -44,9 +43,7 @@
 
             <!-- Header Content -->
             <div class="text-center mb-8">
-                <div class="w-14 h-14 rounded-2xl bg-orange-50 border border-orange-100 text-orange-600 flex items-center justify-center mx-auto mb-4 shadow-inner">
-                    <svg class="w-7 h-7 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                </div>
+                <img src="{{ asset('images/logo.png') }}" alt="Logo ITB Ahmad Dahlan" class="w-16 h-16 rounded-2xl shadow-md mx-auto mb-4 object-contain">
                 <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke Akun Anda</h1>
                 <p class="text-xs text-slate-500 mt-2 max-w-xs mx-auto leading-relaxed">
                     Kelola formulir, pantau respon responden, dan hubungkan Google Sheets secara otomatis.
