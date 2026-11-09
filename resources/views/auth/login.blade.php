@@ -43,7 +43,7 @@
 
             <!-- Header Content -->
             <div class="text-center mb-8">
-                <img src="{{ asset('images/logo.png') }}" alt="Logo ITB Ahmad Dahlan" class="w-16 h-16 rounded-2xl shadow-md mx-auto mb-4 object-contain">
+                <img src="{{ asset('images/itbad-seal.png') }}" alt="Logo Institut Teknologi dan Bisnis Ahmad Dahlan Jakarta" class="w-24 h-24 mx-auto mb-4 object-contain drop-shadow-sm">
                 <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Masuk ke Akun Anda</h1>
                 <p class="text-xs text-slate-500 mt-2 max-w-xs mx-auto leading-relaxed">
                     Kelola formulir, pantau respon responden, dan hubungkan Google Sheets secara otomatis.
