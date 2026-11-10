@@ -165,5 +165,23 @@ class UserJourneyNavigationTest extends TestCase
             ->assertSee($this->form->title)
             ->assertSee('Nama Peserta');
     }
+
+    public function test_public_user_can_access_privacy_policy_page(): void
+    {
+        $response = $this->get('/privacy');
+
+        $response->assertOk()
+            ->assertSee('Kebijakan Privasi')
+            ->assertSee('ITB Ahmad Dahlan Jakarta');
+    }
+
+    public function test_public_user_can_access_terms_of_service_page(): void
+    {
+        $response = $this->get('/terms');
+
+        $response->assertOk()
+            ->assertSee('Syarat & Ketentuan Layanan')
+            ->assertSee('ITB Ahmad Dahlan Jakarta');
+    }
 }
 

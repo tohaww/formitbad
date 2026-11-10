@@ -29,6 +29,10 @@ Route::middleware('guest')->group(function () {
     Route::post('/auth/dev-login', [LoginController::class, 'devLogin'])->name('auth.dev_login');
 });
 
+// Legal & Compliance Pages (Google OAuth Verification)
+Route::view('/privacy', 'privacy')->name('privacy');
+Route::view('/terms', 'terms')->name('terms');
+
 // Google OAuth 2.0 Web Authentication Flow
 Route::prefix('auth/google')->group(function () {
     Route::get('/', [GoogleAuthController::class, 'redirect'])->name('auth.google');

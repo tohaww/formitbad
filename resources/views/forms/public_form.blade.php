@@ -97,7 +97,7 @@
                     $cfg = $field->config ?: [];
                 @endphp
 
-                <div class="theme-card {{ $theme['card_radius'] }} shadow-sm border border-slate-200 p-6 transition-all hover:border-slate-300">
+                <div id="field_container_{{ $field->id }}" data-field-id="{{ $field->id }}" data-field-key="{{ $fieldKey }}" class="theme-card {{ $theme['card_radius'] }} shadow-sm border border-slate-200 p-6 transition-all hover:border-slate-300">
                     <label for="{{ $fieldKey }}" class="block font-bold text-slate-800 text-sm mb-1">
                         {{ $field->label }}
                         @if($field->is_required)
@@ -321,7 +321,118 @@
         });
 
         // ==========================================
-        // 2. DOUBLE-SUBMIT PROTECTION & AJAX SUBMIT
+        // 2. CONDITIONAL LOGIC EVALUATOR
+        // ==========================================
+        const formConditions = @json($form->settings['conditions'] ?? []);
+
+        function getFieldValue(fieldId) {
+            const container = document.getElementById(`field_container_${fieldId}`);
+            if (!container) return '';
+
+            // 1. Text / Number / Email / Textarea / Select
+            const standardInput = container.querySelector('input:not([type="radio"]):not([type="checkbox"]), textarea, select');
+            if (standardInput) {
+                return standardInput.value;
+            }
+
+            // 2. Radio
+            const checkedRadio = container.querySelector('input[type="radio"]:checked');
+            if (checkedRadio) {
+                return checkedRadio.value;
+            }
+
+            // 3. Checkbox
+            const checkedBoxes = Array.from(container.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+            if (checkedBoxes.length > 0) {
+                return checkedBoxes;
+            }
+
+            return '';
+        }
+
+        function evaluateConditions() {
+            if (!Array.isArray(formConditions) || formConditions.length === 0) return;
+
+            formConditions.forEach(cond => {
+                const ifVal = getFieldValue(cond.if_field_id);
+                const targetContainer = document.getElementById(`field_container_${cond.target_field_id}`);
+                if (!targetContainer) return;
+
+                let isMatch = false;
+                const compareVal = (cond.value || '').trim().toLowerCase();
+
+                if (Array.isArray(ifVal)) {
+                    // Checkbox array
+                    const lowerVals = ifVal.map(v => String(v).trim().toLowerCase());
+                    switch (cond.operator) {
+                        case 'equals':
+                            isMatch = lowerVals.includes(compareVal);
+                            break;
+                        case 'not_equals':
+                            isMatch = !lowerVals.includes(compareVal);
+                            break;
+                        case 'contains':
+                            isMatch = lowerVals.some(v => v.includes(compareVal));
+                            break;
+                        case 'is_filled':
+                            isMatch = lowerVals.length > 0;
+                            break;
+                        case 'is_empty':
+                            isMatch = lowerVals.length === 0;
+                            break;
+                    }
+                } else {
+                    const strVal = String(ifVal || '').trim().toLowerCase();
+                    switch (cond.operator) {
+                        case 'equals':
+                            isMatch = strVal === compareVal;
+                            break;
+                        case 'not_equals':
+                            isMatch = strVal !== compareVal;
+                            break;
+                        case 'contains':
+                            isMatch = strVal.includes(compareVal);
+                            break;
+                        case 'is_filled':
+                            isMatch = strVal !== '';
+                            break;
+                        case 'is_empty':
+                            isMatch = strVal === '';
+                            break;
+                    }
+                }
+
+                // Determine whether target field should be shown or hidden
+                let shouldShow = true;
+                if (cond.action === 'show') {
+                    shouldShow = isMatch;
+                } else if (cond.action === 'hide') {
+                    shouldShow = !isMatch;
+                }
+
+                if (shouldShow) {
+                    targetContainer.classList.remove('hidden');
+                    targetContainer.querySelectorAll('input, select, textarea').forEach(el => {
+                        el.disabled = false;
+                    });
+                } else {
+                    targetContainer.classList.add('hidden');
+                    targetContainer.querySelectorAll('input, select, textarea').forEach(el => {
+                        el.disabled = true;
+                    });
+                }
+            });
+        }
+
+        // Attach listeners for conditional logic
+        if (formConditions.length > 0) {
+            form.addEventListener('input', evaluateConditions);
+            form.addEventListener('change', evaluateConditions);
+            evaluateConditions(); // Initial run on load
+        }
+
+        // ==========================================
+        // 3. DOUBLE-SUBMIT PROTECTION & AJAX SUBMIT
         // ==========================================
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
