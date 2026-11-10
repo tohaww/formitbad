@@ -15,13 +15,13 @@ use Illuminate\Support\Facades\Route;
 // 1. PUBLIC ROUTES (Tanpa Autentikasi)
 // =========================================================================
 
-// Root Route: Jika belum login redirect ke /login, jika sudah login redirect ke /dashboard
+// Root Route: Jika sudah login redirect ke dashboard, jika belum tampilkan landing page publik resmi
 Route::get('/', function () {
     if (Auth::check()) {
         return redirect()->route('dashboard');
     }
-    return redirect()->route('login');
-});
+    return view('landing');
+})->name('home');
 
 // Guest Only Login Page
 Route::middleware('guest')->group(function () {
