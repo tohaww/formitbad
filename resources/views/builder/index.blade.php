@@ -461,16 +461,49 @@
                 </div>
             </div>
 
-            <!-- PREVIEW MODAL / OVERLAY IFRAME -->
-            <div id="previewContainer" class="w-full max-w-2xl bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden hidden mb-12">
-                <div class="bg-slate-800 text-white px-5 py-2 text-xs flex items-center justify-between">
-                    <span class="flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-                        Mode Preview Interaktif Responden
-                    </span>
-                    <button onclick="togglePreviewMode(false)" class="text-slate-400 hover:text-white">Tutup Preview</button>
+            <!-- PREVIEW MODAL / OVERLAY IFRAME (JOTFORM STYLE) -->
+            <div id="previewContainer" class="w-full max-w-5xl bg-white rounded-2xl shadow-2xl border border-slate-300 flex flex-col hidden my-2 overflow-hidden" style="height: calc(100vh - 110px);">
+                <!-- Top Preview Header Bar -->
+                <div class="bg-slate-900 text-white px-5 py-2.5 text-xs flex items-center justify-between shrink-0 shadow-sm">
+                    <div class="flex items-center gap-3">
+                        <span class="flex items-center gap-2 font-bold">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
+                            Mode Preview Responden
+                        </span>
+                        <span class="text-slate-600 hidden sm:inline">|</span>
+                        <!-- Device Viewport Switcher -->
+                        <div class="hidden sm:flex items-center bg-slate-800 rounded-lg p-0.5 border border-slate-700">
+                            <button type="button" onclick="setPreviewDevice('desktop')" id="prevBtnDesktop" class="px-2.5 py-1 rounded-md text-[11px] font-semibold bg-orange-500 text-white transition flex items-center gap-1.5" title="Tampilan Desktop">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                                <span>Desktop</span>
+                            </button>
+                            <button type="button" onclick="setPreviewDevice('tablet')" id="prevBtnTablet" class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Tampilan Tablet">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <span>Tablet</span>
+                            </button>
+                            <button type="button" onclick="setPreviewDevice('mobile')" id="prevBtnMobile" class="px-2.5 py-1 rounded-md text-[11px] font-semibold text-slate-300 hover:text-white transition flex items-center gap-1.5" title="Tampilan Ponsel / Mobile">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                                <span>Mobile</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 sm:gap-3">
+                        <a id="btnOpenNewTabPreview" href="#" target="_blank" class="text-slate-300 hover:text-white flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 bg-slate-800 hover:bg-slate-700 rounded-lg transition" title="Buka di tab browser baru">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                            <span class="hidden sm:inline">Buka Tab Baru</span>
+                        </a>
+                        <button type="button" onclick="togglePreviewMode(false)" class="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-xs">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                            <span>Tutup</span>
+                        </button>
+                    </div>
                 </div>
-                <iframe id="previewIframe" src="" class="w-full h-[700px] border-0"></iframe>
+
+                <!-- Iframe Viewport Container (Auto-scrollable) -->
+                <div class="flex-1 w-full bg-slate-100 flex justify-center items-stretch overflow-hidden p-2 sm:p-4">
+                    <iframe id="previewIframe" src="" class="w-full h-full border-0 rounded-xl shadow-sm bg-white transition-all duration-300" style="max-width: 100%;" scrolling="yes"></iframe>
+                </div>
             </div>
         </main>
 
@@ -1877,11 +1910,11 @@
         }
 
         // ==========================================
-        // PREVIEW MODE TOGGLE
+        // PREVIEW MODE TOGGLE & DEVICE SWITCHER
         // ==========================================
         function togglePreviewMode(enable) {
             const previewToggle = document.getElementById('previewToggle');
-            previewToggle.checked = enable;
+            if (previewToggle) previewToggle.checked = enable;
 
             const previewContainer = document.getElementById('previewContainer');
             const previewIframe = document.getElementById('previewIframe');
@@ -1889,15 +1922,57 @@
 
             if (enable) {
                 saveFormFields(false);
-                previewIframe.src = `/f/${formSlug}?t=` + Date.now();
-                previewContainer.classList.remove('hidden');
-                viewBuild.classList.add('hidden');
+                const previewUrl = `/f/${formSlug}?t=` + Date.now();
+                if (previewIframe) previewIframe.src = previewUrl;
+                
+                const newTabBtn = document.getElementById('btnOpenNewTabPreview');
+                if (newTabBtn) newTabBtn.href = `/f/${formSlug}`;
+
+                if (previewContainer) previewContainer.classList.remove('hidden');
+                if (viewBuild) viewBuild.classList.add('hidden');
                 toggleLeftDrawer(false);
                 toggleRightDrawer(false);
+                setPreviewDevice('desktop');
             } else {
-                previewContainer.classList.add('hidden');
-                viewBuild.classList.remove('hidden');
-                previewIframe.src = '';
+                if (previewContainer) previewContainer.classList.add('hidden');
+                if (viewBuild) viewBuild.classList.remove('hidden');
+                if (previewIframe) previewIframe.src = '';
+            }
+        }
+
+        function setPreviewDevice(device) {
+            const iframe = document.getElementById('previewIframe');
+            const btnDesktop = document.getElementById('prevBtnDesktop');
+            const btnTablet = document.getElementById('prevBtnTablet');
+            const btnMobile = document.getElementById('prevBtnMobile');
+
+            [btnDesktop, btnTablet, btnMobile].forEach(btn => {
+                if (btn) {
+                    btn.classList.remove('bg-orange-500', 'text-white');
+                    btn.classList.add('text-slate-300');
+                }
+            });
+
+            if (!iframe) return;
+
+            if (device === 'mobile') {
+                iframe.style.maxWidth = '420px';
+                if (btnMobile) {
+                    btnMobile.classList.remove('text-slate-300');
+                    btnMobile.classList.add('bg-orange-500', 'text-white');
+                }
+            } else if (device === 'tablet') {
+                iframe.style.maxWidth = '768px';
+                if (btnTablet) {
+                    btnTablet.classList.remove('text-slate-300');
+                    btnTablet.classList.add('bg-orange-500', 'text-white');
+                }
+            } else {
+                iframe.style.maxWidth = '100%';
+                if (btnDesktop) {
+                    btnDesktop.classList.remove('text-slate-300');
+                    btnDesktop.classList.add('bg-orange-500', 'text-white');
+                }
             }
         }
 

@@ -11,7 +11,12 @@
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; }
+        html, body {
+            overflow-y: auto !important;
+            height: auto !important;
+            min-height: 100% !important;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
         .ts-control {
             border-radius: 0.5rem !important;
             padding: 0.625rem 0.875rem !important;
