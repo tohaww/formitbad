@@ -1,3 +1,16 @@
+@php
+    $theme = array_merge([
+        'page_bg' => '#f3f3fe',
+        'card_bg' => '#ffffff',
+        'primary_color' => '#059669',
+        'font_family' => 'Plus Jakarta Sans',
+        'card_radius' => 'rounded-2xl',
+        'card_width' => 'max-w-2xl',
+        'logo_url' => '',
+        'logo_align' => 'center',
+        'logo_height' => '56',
+    ], $form->settings['theme'] ?? []);
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,14 +19,16 @@
     <title>Form Builder — {{ $form->title }} | {{ config('app.name', 'CustomFormBuilder') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
     <style>
         body { font-family: 'Plus Jakarta Sans', sans-serif; }
         .jotform-orange { background-color: #ff6100; }
         .jotform-orange-hover:hover { background-color: #e55700; }
         .jotform-dark { background-color: #0a1551; }
-        .canvas-bg { background-color: #f3f3fe; }
+        .canvas-bg { background-color: {{ $theme['page_bg'] }}; }
         /* Custom scrollbar */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
@@ -110,6 +125,22 @@
         </div>
 
         <!-- ------------------------------------------------------------- -->
+        <!-- FLOATING BUTTON ("Form Designer")                             -->
+        <!-- ------------------------------------------------------------- -->
+        <div class="absolute right-4 top-4 z-20">
+            <button
+                id="btnToggleDesignerDrawer"
+                type="button"
+                onclick="toggleDesignerDrawer()"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 text-xs font-bold tracking-wide transition transform hover:scale-105"
+                title="Kustomisasi Tema, Warna & Logo"
+            >
+                <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                <span class="hidden sm:inline">Form Designer</span>
+            </button>
+        </div>
+
+        <!-- ------------------------------------------------------------- -->
         <!-- LEFT DRAWER (ELEMENTS PALETTE)                                -->
         <!-- ------------------------------------------------------------- -->
         <aside
@@ -145,21 +176,29 @@
         <!-- ------------------------------------------------------------- -->
         <!-- CENTER WORKSPACE / CANVAS AREA                                -->
         <!-- ------------------------------------------------------------- -->
-        <main class="flex-1 overflow-y-auto p-6 md:p-10 flex flex-col items-center">
+        <main id="workspaceCanvas" class="flex-1 overflow-y-auto p-6 md:p-10 flex flex-col items-center transition-colors duration-300" style="background-color: {{ $theme['page_bg'] }};">
 
             <!-- TAB 1: BUILD CANVAS -->
-            <div id="viewBuild" class="w-full max-w-2xl flex flex-col items-center">
+            <div id="viewBuild" class="w-full {{ $theme['card_width'] }} flex flex-col items-center transition-all duration-300">
                 <!-- White Paper Form Card -->
-                <div class="w-full bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-12 transition-all">
+                <div id="canvasCard" class="w-full {{ $theme['card_radius'] }} shadow-sm border border-slate-200 overflow-hidden mb-12 transition-all" style="background-color: {{ $theme['card_bg'] }}; font-family: '{{ $theme['font_family'] }}', sans-serif;">
 
                     <!-- Form Header Area -->
-                    <div class="p-8 border-b border-slate-100 relative group">
-                        <div class="text-center">
-                            <!-- Add Logo Button -->
-                            <button class="mb-4 inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition border border-dashed border-slate-300">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
-                                <span>+ Add Logo</span>
-                            </button>
+                    <div id="canvasHeader" class="p-8 border-b border-slate-100 relative group">
+                        <div id="canvasHeaderAlign" class="text-{{ $theme['logo_align'] }}">
+                            <!-- Form Logo Container -->
+                            <div id="canvasLogoContainer" class="mb-4">
+                                <div id="canvasLogoImgWrapper" class="{{ empty($theme['logo_url']) ? 'hidden' : '' }} inline-flex items-center gap-2 group/logo relative">
+                                    <img id="canvasLogoImg" src="{{ $theme['logo_url'] }}" alt="Form Logo" class="inline-block object-contain rounded-lg" style="height: {{ $theme['logo_height'] }}px;">
+                                    <button type="button" onclick="openDesignerLogoTab()" class="ml-2 px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded text-[11px] font-semibold border border-slate-300 transition">
+                                        Ganti Logo
+                                    </button>
+                                </div>
+                                <button id="btnCanvasAddLogo" type="button" onclick="openDesignerLogoTab()" class="{{ !empty($theme['logo_url']) ? 'hidden' : '' }} inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-xs font-semibold transition border border-dashed border-slate-300">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                    <span>+ Add Logo</span>
+                                </button>
+                            </div>
                             <h1 id="canvasFormTitle" class="text-2xl md:text-3xl font-extrabold text-slate-900 tracking-tight cursor-text" contenteditable="true" onblur="updateFormMeta('title', this.innerText)">{{ $form->title }}</h1>
                             <p id="canvasFormDesc" class="text-sm text-slate-500 mt-2 max-w-lg mx-auto cursor-text" contenteditable="true" onblur="updateFormMeta('description', this.innerText)">{{ $form->description ?: 'Klik di sini untuk menulis deskripsi formulir...' }}</p>
                         </div>
@@ -172,7 +211,7 @@
 
                     <!-- Form Submit Button Footer -->
                     <div class="p-8 pt-4 bg-slate-50 border-t border-slate-100 flex items-center justify-between">
-                        <button type="button" class="px-8 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm rounded-xl shadow-sm transition cursor-pointer">
+                        <button id="canvasSubmitBtn" type="button" class="px-8 py-3 text-white font-bold text-sm {{ $theme['card_radius'] }} shadow-sm transition cursor-pointer" style="background-color: {{ $theme['primary_color'] }};">
                             Submit Form
                         </button>
                         <span class="text-xs text-slate-400">CustomFormBuilder Engine</span>
@@ -531,6 +570,187 @@
             </div>
         </aside>
 
+        <!-- ------------------------------------------------------------- -->
+        <!-- 4. RIGHT FORM DESIGNER DRAWER (JOTFORM STYLE)                 -->
+        <!-- ------------------------------------------------------------- -->
+        <aside
+            id="designerDrawer"
+            class="w-96 bg-white border-l border-slate-200 flex flex-col z-20 absolute inset-y-0 right-0 shadow-2xl transition-transform duration-300 transform translate-x-full overflow-hidden"
+            style="width: 380px;"
+        >
+            <div class="p-4 border-b border-slate-100 flex items-center justify-between jotform-dark text-white">
+                <div class="flex items-center gap-2">
+                    <span class="p-1.5 bg-blue-500 rounded-lg text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"/></svg>
+                    </span>
+                    <div>
+                        <h3 class="font-extrabold text-xs uppercase tracking-wider text-white">Form Designer</h3>
+                        <p class="text-[10px] text-slate-400">Warna, Font & Layout Formulir</p>
+                    </div>
+                </div>
+                <button onclick="toggleDesignerDrawer(false)" class="text-white/60 hover:text-white p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Designer Sub-Tabs -->
+            <div class="flex border-b border-slate-200 px-2 bg-slate-50 text-[11px] font-bold">
+                <button id="desTabColors" type="button" onclick="switchDesignerTab('colors')" class="py-2.5 px-2 border-b-2 border-orange-500 text-orange-600 font-bold transition flex-1 text-center">Warna</button>
+                <button id="desTabStyles" type="button" onclick="switchDesignerTab('styles')" class="py-2.5 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex-1 text-center">Layout</button>
+                <button id="desTabFonts" type="button" onclick="switchDesignerTab('fonts')" class="py-2.5 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex-1 text-center">Font</button>
+                <button id="desTabLogo" type="button" onclick="switchDesignerTab('logo')" class="py-2.5 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex-1 text-center">Logo</button>
+            </div>
+
+            <!-- Designer Body Content -->
+            <div id="designerBody" class="flex-1 overflow-y-auto p-5 space-y-6 text-xs">
+                <!-- Tab 1: Colors -->
+                <div id="desSecColors" class="space-y-5">
+                    <div>
+                        <label class="block font-bold text-slate-800 mb-2">Warna Latar Kanvas (Page Background)</label>
+                        <div class="flex items-center gap-2 mb-2">
+                            <button type="button" onclick="setThemeProperty('page_bg', '#f3f3fe')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #f3f3fe;" title="Soft Purple"></button>
+                            <button type="button" onclick="setThemeProperty('page_bg', '#f8fafc')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #f8fafc;" title="Slate Clean"></button>
+                            <button type="button" onclick="setThemeProperty('page_bg', '#f0fdf4')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #f0fdf4;" title="Pastel Mint"></button>
+                            <button type="button" onclick="setThemeProperty('page_bg', '#fffbeb')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #fffbeb;" title="Warm Sand"></button>
+                            <button type="button" onclick="setThemeProperty('page_bg', '#0f172a')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #0f172a;" title="Dark Slate"></button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="inputThemePageBg" value="{{ $theme['page_bg'] }}" onchange="setThemeProperty('page_bg', this.value)" class="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5">
+                            <span class="text-[11px] text-slate-500">Pilih warna kustom</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block font-bold text-slate-800 mb-2">Warna Kartu Formulir (Card Background)</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setThemeProperty('card_bg', '#ffffff')" class="py-2 px-2 text-center border rounded-xl hover:border-orange-500 transition font-semibold text-[11px] bg-white text-slate-800">Putih</button>
+                            <button type="button" onclick="setThemeProperty('card_bg', '#f8fafc')" class="py-2 px-2 text-center border rounded-xl hover:border-orange-500 transition font-semibold text-[11px] bg-slate-50 text-slate-800">Slate</button>
+                            <button type="button" onclick="setThemeProperty('card_bg', '#1e293b')" class="py-2 px-2 text-center border rounded-xl hover:border-orange-500 transition font-semibold text-[11px] bg-slate-800 text-white">Dark Card</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block font-bold text-slate-800 mb-2">Warna Tombol Submit (Primary Accent)</label>
+                        <div class="flex items-center gap-2 mb-2">
+                            <button type="button" onclick="setThemeProperty('primary_color', '#059669')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #059669;" title="Emerald Green"></button>
+                            <button type="button" onclick="setThemeProperty('primary_color', '#ff6100')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #ff6100;" title="Jotform Orange"></button>
+                            <button type="button" onclick="setThemeProperty('primary_color', '#4f46e5')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #4f46e5;" title="Royal Indigo"></button>
+                            <button type="button" onclick="setThemeProperty('primary_color', '#0284c7')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #0284c7;" title="Sky Blue"></button>
+                            <button type="button" onclick="setThemeProperty('primary_color', '#e11d48')" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-xs hover:scale-110 transition" style="background-color: #e11d48;" title="Crimson Rose"></button>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <input type="color" id="inputThemePrimary" value="{{ $theme['primary_color'] }}" onchange="setThemeProperty('primary_color', this.value)" class="w-8 h-8 rounded-lg cursor-pointer border border-slate-300 p-0.5">
+                            <span class="text-[11px] text-slate-500">Pilih warna kustom</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Layout & Styles -->
+                <div id="desSecStyles" class="space-y-5 hidden">
+                    <div>
+                        <label class="block font-bold text-slate-800 mb-2">Lebar Formulir (Card Width)</label>
+                        <div class="space-y-1.5">
+                            <button type="button" onclick="setThemeProperty('card_width', 'max-w-xl')" class="w-full py-2 px-3 text-left border rounded-xl hover:border-orange-500 transition font-medium flex items-center justify-between">
+                                <span>Ringkas (Compact)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">580px</span>
+                            </button>
+                            <button type="button" onclick="setThemeProperty('card_width', 'max-w-2xl')" class="w-full py-2 px-3 text-left border rounded-xl hover:border-orange-500 transition font-medium flex items-center justify-between">
+                                <span>Standar (Default)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">680px</span>
+                            </button>
+                            <button type="button" onclick="setThemeProperty('card_width', 'max-w-3xl')" class="w-full py-2 px-3 text-left border rounded-xl hover:border-orange-500 transition font-medium flex items-center justify-between">
+                                <span>Lebar (Wide)</span>
+                                <span class="text-[10px] text-slate-400 font-mono">820px</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block font-bold text-slate-800 mb-2">Lengkungan Sudut Kartu (Border Radius)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" onclick="setThemeProperty('card_radius', 'rounded-none')" class="py-2.5 px-2 text-center border rounded-none hover:border-orange-500 transition font-medium text-[11px]">Persegi (Sharp)</button>
+                            <button type="button" onclick="setThemeProperty('card_radius', 'rounded-xl')" class="py-2.5 px-2 text-center border rounded-xl hover:border-orange-500 transition font-medium text-[11px]">Sedang (12px)</button>
+                            <button type="button" onclick="setThemeProperty('card_radius', 'rounded-2xl')" class="py-2.5 px-2 text-center border rounded-2xl hover:border-orange-500 transition font-medium text-[11px]">Lembut (16px)</button>
+                            <button type="button" onclick="setThemeProperty('card_radius', 'rounded-3xl')" class="py-2.5 px-2 text-center border rounded-3xl hover:border-orange-500 transition font-medium text-[11px]">Ekstra (24px)</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Fonts -->
+                <div id="desSecFonts" class="space-y-3 hidden">
+                    <label class="block font-bold text-slate-800 mb-2">Pilih Jenis Font Formulir</label>
+                    <button type="button" onclick="setThemeProperty('font_family', 'Plus Jakarta Sans')" class="w-full p-3 border rounded-xl hover:border-orange-500 transition text-left flex items-center justify-between" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        <span class="font-bold text-sm">Plus Jakarta Sans</span>
+                        <span class="text-[10px] text-slate-400">Modern Clean</span>
+                    </button>
+                    <button type="button" onclick="setThemeProperty('font_family', 'Inter')" class="w-full p-3 border rounded-xl hover:border-orange-500 transition text-left flex items-center justify-between" style="font-family: 'Inter', sans-serif;">
+                        <span class="font-bold text-sm">Inter</span>
+                        <span class="text-[10px] text-slate-400">Sleek Tech</span>
+                    </button>
+                    <button type="button" onclick="setThemeProperty('font_family', 'Roboto')" class="w-full p-3 border rounded-xl hover:border-orange-500 transition text-left flex items-center justify-between" style="font-family: 'Roboto', sans-serif;">
+                        <span class="font-bold text-sm">Roboto</span>
+                        <span class="text-[10px] text-slate-400">Classic Standard</span>
+                    </button>
+                    <button type="button" onclick="setThemeProperty('font_family', 'Poppins')" class="w-full p-3 border rounded-xl hover:border-orange-500 transition text-left flex items-center justify-between" style="font-family: 'Poppins', sans-serif;">
+                        <span class="font-bold text-sm">Poppins</span>
+                        <span class="text-[10px] text-slate-400">Geometric Bold</span>
+                    </button>
+                    <button type="button" onclick="setThemeProperty('font_family', 'Outfit')" class="w-full p-3 border rounded-xl hover:border-orange-500 transition text-left flex items-center justify-between" style="font-family: 'Outfit', sans-serif;">
+                        <span class="font-bold text-sm">Outfit</span>
+                        <span class="text-[10px] text-slate-400">Youthful Fresh</span>
+                    </button>
+                </div>
+
+                <!-- Tab 4: Logo -->
+                <div id="desSecLogo" class="space-y-4 hidden">
+                    <div>
+                        <label class="block font-bold text-slate-800 mb-1">URL Gambar Logo</label>
+                        <input type="text" id="inputThemeLogoUrl" value="{{ $theme['logo_url'] }}" oninput="setThemeProperty('logo_url', this.value)" placeholder="https://domain.com/logo.png" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs outline-none focus:border-orange-500">
+                        <p class="text-[10px] text-slate-400 mt-1">Masukkan URL gambar logo atau klik preset di bawah.</p>
+                    </div>
+
+                    <div>
+                        <label class="block font-bold text-slate-800 mb-1.5">Preset Logo Resmi</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="setThemeProperty('logo_url', '/images/itbad-seal.png')" class="flex-1 p-2 border rounded-xl hover:border-orange-500 transition flex items-center gap-2">
+                                <img src="/images/itbad-seal.png" alt="Seal" class="w-6 h-6 object-contain">
+                                <span class="font-semibold text-[11px]">Lambang ITB-AD</span>
+                            </button>
+                            <button type="button" onclick="setThemeProperty('logo_url', '/images/logo.png')" class="flex-1 p-2 border rounded-xl hover:border-orange-500 transition flex items-center gap-2">
+                                <img src="/images/logo.png" alt="Icon" class="w-6 h-6 object-contain rounded">
+                                <span class="font-semibold text-[11px]">Ikon Aplikasi</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block font-bold text-slate-800 mb-1.5">Posisi Logo</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setThemeProperty('logo_align', 'left')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Kiri</button>
+                            <button type="button" onclick="setThemeProperty('logo_align', 'center')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Tengah</button>
+                            <button type="button" onclick="setThemeProperty('logo_align', 'right')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Kanan</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <label class="block font-bold text-slate-800 mb-1.5">Tinggi Logo</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button type="button" onclick="setThemeProperty('logo_height', '40')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Kecil (40px)</button>
+                            <button type="button" onclick="setThemeProperty('logo_height', '56')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Sedang (56px)</button>
+                            <button type="button" onclick="setThemeProperty('logo_height', '72')" class="py-2 text-center border rounded-xl hover:border-orange-500 font-semibold text-[11px]">Besar (72px)</button>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100">
+                        <button type="button" onclick="setThemeProperty('logo_url', '')" class="w-full py-2 px-3 border border-rose-200 text-rose-600 rounded-xl hover:bg-rose-50 text-xs font-bold transition flex items-center justify-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            <span>Hapus Logo dari Formulir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
     </div>
 
     <!-- ================================================================= -->
@@ -878,10 +1098,13 @@
 
         function toggleRightDrawer(forceState) {
             const drawer = document.getElementById('rightDrawer');
-            if (typeof forceState === 'boolean') {
-                drawer.classList.toggle('translate-x-full', !forceState);
+            if (!drawer) return;
+            const willOpen = typeof forceState === 'boolean' ? forceState : drawer.classList.contains('translate-x-full');
+            if (willOpen) {
+                toggleDesignerDrawer(false);
+                drawer.classList.remove('translate-x-full');
             } else {
-                drawer.classList.toggle('translate-x-full');
+                drawer.classList.add('translate-x-full');
             }
         }
 
@@ -1974,6 +2197,155 @@
                     btnDesktop.classList.add('bg-orange-500', 'text-white');
                 }
             }
+        }
+
+        // ==========================================
+        // FORM DESIGNER & THEME CUSTOMIZER ENGINE
+        // ==========================================
+        let currentTheme = @json($theme);
+        let themeSaveDebounceTimer = null;
+
+        function toggleDesignerDrawer(forceState) {
+            const drawer = document.getElementById('designerDrawer');
+            if (!drawer) return;
+
+            const isCurrentlyOpen = !drawer.classList.contains('translate-x-full');
+            const targetState = (typeof forceState === 'boolean') ? forceState : !isCurrentlyOpen;
+
+            if (targetState) {
+                // Close right field properties drawer if open
+                if (typeof toggleRightDrawer === 'function') {
+                    const propDrawer = document.getElementById('rightDrawer');
+                    if (propDrawer) propDrawer.classList.add('translate-x-full');
+                }
+                drawer.classList.remove('translate-x-full');
+            } else {
+                drawer.classList.add('translate-x-full');
+            }
+        }
+
+        function switchDesignerTab(tab) {
+            const tabs = ['colors', 'styles', 'fonts', 'logo'];
+            tabs.forEach(t => {
+                const btn = document.getElementById('desTab' + t.charAt(0).toUpperCase() + t.slice(1));
+                const sec = document.getElementById('desSec' + t.charAt(0).toUpperCase() + t.slice(1));
+                if (btn && sec) {
+                    if (t === tab) {
+                        btn.className = 'py-2.5 px-2 border-b-2 border-orange-500 text-orange-600 font-bold transition flex-1 text-center';
+                        sec.classList.remove('hidden');
+                    } else {
+                        btn.className = 'py-2.5 px-2 border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition flex-1 text-center';
+                        sec.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        function setThemeProperty(key, value) {
+            currentTheme[key] = value;
+
+            // Sync inputs if applicable
+            if (key === 'page_bg') {
+                const input = document.getElementById('inputThemePageBg');
+                if (input) input.value = value;
+            } else if (key === 'primary_color') {
+                const input = document.getElementById('inputThemePrimary');
+                if (input) input.value = value;
+            } else if (key === 'logo_url') {
+                const input = document.getElementById('inputThemeLogoUrl');
+                if (input) input.value = value;
+            }
+
+            applyThemeLivePreview(currentTheme);
+            saveThemeSettings();
+        }
+
+        function applyThemeLivePreview(theme) {
+            // 1. Workspace canvas background
+            const workspace = document.getElementById('workspaceCanvas');
+            if (workspace && theme.page_bg) {
+                workspace.style.backgroundColor = theme.page_bg;
+            }
+
+            // 2. Card width
+            const viewBuild = document.getElementById('viewBuild');
+            if (viewBuild) {
+                viewBuild.className = `w-full ${theme.card_width || 'max-w-2xl'} flex flex-col items-center transition-all duration-300`;
+            }
+
+            // 3. Card styling (bg, radius, font)
+            const card = document.getElementById('canvasCard');
+            if (card) {
+                card.style.backgroundColor = theme.card_bg || '#ffffff';
+                card.style.fontFamily = `'${theme.font_family || 'Plus Jakarta Sans'}', sans-serif`;
+                card.classList.remove('rounded-none', 'rounded-xl', 'rounded-2xl', 'rounded-3xl');
+                card.classList.add(theme.card_radius || 'rounded-2xl');
+            }
+
+            // 4. Primary button styling
+            const submitBtn = document.getElementById('canvasSubmitBtn');
+            if (submitBtn) {
+                if (theme.primary_color) submitBtn.style.backgroundColor = theme.primary_color;
+                submitBtn.classList.remove('rounded-none', 'rounded-xl', 'rounded-2xl', 'rounded-3xl');
+                submitBtn.classList.add(theme.card_radius || 'rounded-2xl');
+            }
+
+            // 5. Header Logo styling & positioning
+            const headerAlign = document.getElementById('canvasHeaderAlign');
+            if (headerAlign && theme.logo_align) {
+                headerAlign.className = 'text-' + theme.logo_align;
+            }
+
+            const logoImgWrapper = document.getElementById('canvasLogoImgWrapper');
+            const logoImg = document.getElementById('canvasLogoImg');
+            const btnAddLogo = document.getElementById('btnCanvasAddLogo');
+
+            if (theme.logo_url && theme.logo_url.trim() !== '') {
+                if (logoImg) {
+                    logoImg.src = theme.logo_url;
+                    logoImg.style.height = (theme.logo_height || '56') + 'px';
+                }
+                if (logoImgWrapper) logoImgWrapper.classList.remove('hidden');
+                if (btnAddLogo) btnAddLogo.classList.add('hidden');
+            } else {
+                if (logoImgWrapper) logoImgWrapper.classList.add('hidden');
+                if (btnAddLogo) btnAddLogo.classList.remove('hidden');
+            }
+        }
+
+        function saveThemeSettings() {
+            clearTimeout(themeSaveDebounceTimer);
+            const statusText = document.getElementById('saveStatusText');
+            if (statusText) statusText.innerText = 'Menyimpan...';
+
+            themeSaveDebounceTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/dashboard/forms/${formId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            settings: {
+                                theme: currentTheme
+                            }
+                        })
+                    });
+
+                    if (response.ok) {
+                        if (statusText) statusText.innerText = 'Tersimpan';
+                    }
+                } catch (err) {
+                    console.error('Error saving theme settings:', err);
+                }
+            }, 500);
+        }
+
+        function openDesignerLogoTab() {
+            toggleDesignerDrawer(true);
+            switchDesignerTab('logo');
         }
 
         // ==========================================

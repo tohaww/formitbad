@@ -1,3 +1,16 @@
+@php
+    $theme = array_merge([
+        'page_bg' => '#f8fafc',
+        'card_bg' => '#ffffff',
+        'primary_color' => '#059669',
+        'font_family' => 'Plus Jakarta Sans',
+        'card_radius' => 'rounded-2xl',
+        'card_width' => 'max-w-2xl',
+        'logo_url' => '',
+        'logo_align' => 'center',
+        'logo_height' => '56',
+    ], $form->settings['theme'] ?? []);
+@endphp
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -6,7 +19,9 @@
     <title>{{ $form->title }} | {{ config('app.name', 'CustomFormBuilder') }}</title>
     <link rel="icon" type="image/png" href="{{ asset('images/logo.png') }}">
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <!-- TomSelect Autocomplete Library -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
@@ -15,7 +30,17 @@
             overflow-y: auto !important;
             height: auto !important;
             min-height: 100% !important;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: '{{ $theme['font_family'] }}', 'Plus Jakarta Sans', sans-serif !important;
+            background-color: {{ $theme['page_bg'] }} !important;
+        }
+        .theme-card {
+            background-color: {{ $theme['card_bg'] }} !important;
+        }
+        .theme-submit-btn {
+            background-color: {{ $theme['primary_color'] }} !important;
+        }
+        .theme-submit-btn:hover {
+            filter: brightness(0.92);
         }
         .ts-control {
             border-radius: 0.5rem !important;
@@ -24,8 +49,8 @@
             font-size: 0.875rem !important;
         }
         .ts-control.focus {
-            border-color: #f97316 !important;
-            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.2) !important;
+            border-color: {{ $theme['primary_color'] }} !important;
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
         }
         .ts-dropdown {
             border-radius: 0.75rem !important;
@@ -35,12 +60,17 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen py-10 px-4">
-    <div class="max-w-2xl mx-auto">
+<body class="min-h-screen py-10 px-4" style="background-color: {{ $theme['page_bg'] }};">
+    <div class="{{ $theme['card_width'] }} mx-auto">
         <!-- Header Card (Jotform Visual Style) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6">
-            <div class="h-3 bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500"></div>
+        <div class="theme-card {{ $theme['card_radius'] }} shadow-sm border border-slate-200 overflow-hidden mb-6">
+            <div class="h-3 bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500" style="background: linear-gradient(to right, {{ $theme['primary_color'] }}, #f59e0b, #10b981);"></div>
             <div class="p-8">
+                @if(!empty($theme['logo_url']))
+                    <div class="mb-5 text-{{ $theme['logo_align'] }}">
+                        <img src="{{ $theme['logo_url'] }}" alt="Logo Formulir" class="inline-block object-contain rounded-lg" style="height: {{ $theme['logo_height'] }}px;">
+                    </div>
+                @endif
                 <span class="inline-block px-3 py-1 bg-orange-50 text-orange-700 text-xs font-bold rounded-full mb-3 uppercase tracking-wider">
                     Formulir Resmi
                 </span>
@@ -67,7 +97,7 @@
                     $cfg = $field->config ?: [];
                 @endphp
 
-                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 transition-all hover:border-slate-300">
+                <div class="theme-card {{ $theme['card_radius'] }} shadow-sm border border-slate-200 p-6 transition-all hover:border-slate-300">
                     <label for="{{ $fieldKey }}" class="block font-bold text-slate-800 text-sm mb-1">
                         {{ $field->label }}
                         @if($field->is_required)
@@ -218,7 +248,7 @@
                 <button
                     type="submit"
                     id="submitBtn"
-                    class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold text-sm rounded-xl shadow-sm hover:shadow transition flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="theme-submit-btn px-8 py-3.5 text-white font-bold text-sm {{ $theme['card_radius'] }} shadow-sm hover:shadow transition flex items-center gap-2.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span id="btnText">Kirim Jawaban</span>
                     <svg id="btnSpinner" class="hidden animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
