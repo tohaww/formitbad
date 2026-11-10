@@ -43,9 +43,11 @@ class RemoteDataProxyService
         $cacheKey = "sheet_remote_data:{$spreadsheetId}:{$sheetName}:" . md5($cleanRange);
         $ttl = (int)env('SPREADSHEET_CACHE_TTL', 900); // 15 menit (900 detik)
 
+        $user = $field->form?->user;
+
         // Fetch from Cache or Google Sheets API
-        $rawRows = Cache::remember($cacheKey, $ttl, function () use ($spreadsheetId, $sheetName, $cleanRange) {
-            return $this->sheetService->fetchSheetRows($spreadsheetId, $sheetName, $cleanRange);
+        $rawRows = Cache::remember($cacheKey, $ttl, function () use ($spreadsheetId, $sheetName, $cleanRange, $user) {
+            return $this->sheetService->fetchSheetRows($spreadsheetId, $sheetName, $cleanRange, $user);
         });
 
         if (empty($rawRows)) {
@@ -97,6 +99,9 @@ class RemoteDataProxyService
         if ($q !== '') {
             $items = array_values(array_filter($items, function (array $item) use ($q) {
                 if (mb_stripos($item['label'], $q) !== false) {
+                    return true;
+                }
+                if (!empty($item['value']) && mb_stripos($item['value'], $q) !== false) {
                     return true;
                 }
                 if (!empty($item['subtext']) && mb_stripos($item['subtext'], $q) !== false) {

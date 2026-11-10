@@ -114,7 +114,7 @@ class RemoteDataProxyEngineTest extends TestCase
         // Should be called only ONCE due to 15-minute caching
         $sheetServiceMock->shouldReceive('fetchSheetRows')
             ->once()
-            ->with('spreadsheet-test-123', 'MataKuliah', 'A2:C')
+            ->with('spreadsheet-test-123', 'MataKuliah', 'A2:C', Mockery::any())
             ->andReturn($fakeSheetData);
 
         $this->app->instance(GoogleSheetService::class, $sheetServiceMock);

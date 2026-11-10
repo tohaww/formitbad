@@ -279,7 +279,7 @@
             new TomSelect(selectEl, {
                 valueField: 'value',
                 labelField: 'label',
-                searchField: ['label', 'subtext'],
+                searchField: ['label', 'value', 'subtext'],
                 placeholder: placeholder,
                 maxItems: 1,
                 loadThrottle: 300,

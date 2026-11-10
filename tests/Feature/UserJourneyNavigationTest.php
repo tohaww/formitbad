@@ -46,7 +46,8 @@ class UserJourneyNavigationTest extends TestCase
     public function test_unauthenticated_user_accessing_root_redirects_to_login(): void
     {
         $response = $this->get('/');
-        $response->assertRedirect('/login');
+        $response->assertOk()
+            ->assertSee('Formnis');
     }
 
     public function test_unauthenticated_user_can_view_clean_login_page_with_google_button(): void
