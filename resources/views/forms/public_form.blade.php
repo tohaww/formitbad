@@ -47,16 +47,34 @@
             padding: 0.625rem 0.875rem !important;
             border-color: #cbd5e1 !important;
             font-size: 0.875rem !important;
+            background-color: #ffffff !important;
         }
         .ts-control.focus {
             border-color: {{ $theme['primary_color'] }} !important;
             box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
         }
         .ts-dropdown {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
             border-radius: 0.75rem !important;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
-            border-color: #e2e8f0 !important;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.18), 0 10px 10px -5px rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid #cbd5e1 !important;
             overflow: hidden !important;
+            z-index: 9999 !important;
+            margin-top: 4px !important;
+        }
+        .ts-dropdown .ts-dropdown-content {
+            background-color: #ffffff !important;
+            background: #ffffff !important;
+            max-height: 250px !important;
+        }
+        .ts-dropdown .option {
+            background-color: #ffffff !important;
+            color: #1e293b !important;
+        }
+        .ts-dropdown .option:hover, .ts-dropdown .option.active {
+            background-color: #fff7ed !important;
+            color: #0f172a !important;
         }
     </style>
 </head>
@@ -204,23 +222,7 @@
                                     class="tom-select-remote w-full"
                                     data-field-id="{{ $field->id }}"
                                     data-placeholder="{{ $field->placeholder ?: 'Ketik untuk mencari data dari Google Sheets...' }}"
-                                    data-min-chars="{{ $cfg['min_search_chars'] ?? 2 }}"
-                                    {{ $field->is_required ? 'required' : '' }}
-                                >
-                                    <option value="">{{ $field->placeholder ?: 'Ketik untuk mencari data...' }}</option>
-                                </select>
-                            </div>
-                            @break
-
-                        @case('remote_data_dropdown')
-                            <div class="mt-2">
-                                <select
-                                    id="{{ $fieldKey }}"
-                                    name="{{ $fieldKey }}"
-                                    class="tom-select-remote w-full"
-                                    data-field-id="{{ $field->id }}"
-                                    data-placeholder="{{ $field->placeholder ?: 'Ketik untuk mencari data dari Google Sheets...' }}"
-                                    data-min-chars="{{ $cfg['min_search_chars'] ?? 2 }}"
+                                    data-min-chars="{{ $cfg['min_search_chars'] ?? 1 }}"
                                     {{ $field->is_required ? 'required' : '' }}
                                 >
                                     <option value="">{{ $field->placeholder ?: 'Ketik untuk mencari data...' }}</option>
@@ -275,6 +277,7 @@
         document.querySelectorAll('.tom-select-remote').forEach(selectEl => {
             const fieldId = selectEl.dataset.fieldId;
             const placeholder = selectEl.dataset.placeholder;
+            const minChars = parseInt(selectEl.dataset.minChars) || 1;
 
             new TomSelect(selectEl, {
                 valueField: 'value',
@@ -282,9 +285,12 @@
                 searchField: ['label', 'value', 'subtext'],
                 placeholder: placeholder,
                 maxItems: 1,
-                loadThrottle: 300,
-                preload: 'focus', // Load initial options when focused
+                loadThrottle: 250,
+                preload: false, // JANGAN tampilkan data sebelum user mengetik
                 load: function(query, callback) {
+                    if (!query || query.trim().length < minChars) {
+                        return callback();
+                    }
                     const url = `/api/public/forms/{{ $form->slug }}/fields/${fieldId}/remote-options?q=${encodeURIComponent(query)}&limit=20`;
                     fetch(url)
                         .then(res => res.json())
@@ -299,21 +305,21 @@
                 },
                 render: {
                     option: function(item, escape) {
-                        return `<div class="py-2 px-3 hover:bg-orange-50 transition cursor-pointer">
-                            <div class="font-semibold text-slate-900 text-sm">${escape(item.label)}</div>
-                            ${item.subtext ? `<div class="text-xs text-slate-400 mt-0.5">${escape(item.subtext)}</div>` : ''}
+                        return `<div class="py-2.5 px-3 hover:bg-orange-50 transition cursor-pointer border-b border-slate-100 last:border-b-0 bg-white">
+                            <div class="font-bold text-slate-900 text-sm">${escape(item.label)}</div>
+                            ${item.subtext ? `<div class="text-xs text-slate-500 font-medium mt-0.5">${escape(item.subtext)}</div>` : ''}
                         </div>`;
                     },
                     item: function(item, escape) {
-                        return `<div class="font-semibold text-slate-800 text-sm">${escape(item.label)}</div>`;
+                        return `<div class="font-bold text-slate-800 text-sm">${escape(item.label)}</div>`;
                     },
                     no_results: function() {
-                        return `<div class="py-2.5 px-3 text-xs text-slate-400">Tidak ada data ditemukan di spreadsheet.</div>`;
+                        return `<div class="py-3 px-3 text-xs text-slate-500 bg-white">Tidak ada data ditemukan di spreadsheet.</div>`;
                     },
                     loading: function() {
-                        return `<div class="py-2.5 px-3 text-xs text-orange-600 font-semibold flex items-center gap-2">
+                        return `<div class="py-3 px-3 text-xs text-orange-600 font-semibold flex items-center gap-2 bg-white">
                             <svg class="animate-spin h-3.5 w-3.5 text-orange-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg>
-                            Memuat data Google Sheets...
+                            Mencari data di Google Sheets...
                         </div>`;
                     }
                 }
