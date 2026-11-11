@@ -342,9 +342,9 @@ window.WidgetRegistry = (function () {
                 key: 'column_subtext',
                 label: 'Kolom Subtext (Keterangan Tambahan)',
                 type: 'text',
-                placeholder: 'C',
+                placeholder: 'B, D (NIM & Prodi)',
                 default: 'C',
-                hint: 'Huruf kolom misal C (Program Studi / Unit Kerja)'
+                hint: 'Huruf kolom misal D atau gabungan B, D (NIM & Prodi)'
             },
             {
                 key: 'min_search_chars',

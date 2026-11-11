@@ -70,7 +70,21 @@ class RemoteDataProxyService
 
         $valIdx = $this->resolveColumnIndex($valCol, $firstRow);
         $labelIdx = $this->resolveColumnIndex($labelCol, $firstRow);
-        $subtextIdx = $this->resolveColumnIndex($subtextCol, $firstRow);
+
+        // Support single or multiple subtext columns (e.g. "B, D" or "B,D" or "B - D" or "NIM, Prodi")
+        $subtextCols = preg_split('/[,;\-]+/', (string)$subtextCol, -1, PREG_SPLIT_NO_EMPTY);
+        $subtextIndexes = [];
+        if (!empty($subtextCols)) {
+            foreach ($subtextCols as $colItem) {
+                $colItem = trim($colItem);
+                if ($colItem !== '') {
+                    $subtextIndexes[] = $this->resolveColumnIndex($colItem, $firstRow);
+                }
+            }
+            $subtextIndexes = array_values(array_unique($subtextIndexes));
+        } else {
+            $subtextIndexes = [$this->resolveColumnIndex($subtextCol, $firstRow)];
+        }
 
         // Check if first row is a header row (e.g. if column specified was a header name)
         $hasHeader = $this->isHeaderRow($valCol, $labelCol, $firstRow);
@@ -81,7 +95,14 @@ class RemoteDataProxyService
         foreach ($dataRows as $row) {
             $value = isset($row[$valIdx]) ? trim((string)$row[$valIdx]) : '';
             $label = isset($row[$labelIdx]) ? trim((string)$row[$labelIdx]) : '';
-            $subtext = ($subtextIdx !== null && isset($row[$subtextIdx])) ? trim((string)$row[$subtextIdx]) : null;
+
+            $subtextParts = [];
+            foreach ($subtextIndexes as $sIdx) {
+                if (isset($row[$sIdx]) && trim((string)$row[$sIdx]) !== '') {
+                    $subtextParts[] = trim((string)$row[$sIdx]);
+                }
+            }
+            $subtext = !empty($subtextParts) ? implode(' • ', $subtextParts) : null;
 
             if ($value === '' && $label === '') {
                 continue;
@@ -90,7 +111,7 @@ class RemoteDataProxyService
             $items[] = [
                 'value' => $value !== '' ? $value : $label,
                 'label' => $label !== '' ? $label : $value,
-                'subtext' => $subtext !== '' ? $subtext : null,
+                'subtext' => $subtext,
             ];
         }
 
