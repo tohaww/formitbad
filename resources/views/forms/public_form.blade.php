@@ -311,7 +311,7 @@
                         </div>`;
                     },
                     item: function(item, escape) {
-                        return `<div class="font-bold text-slate-800 text-sm">${escape(item.label)}</div>`;
+                        return `<div class="font-bold text-slate-800 text-sm">${escape(item.label)}${item.subtext ? ` <span class="text-xs text-slate-500 font-medium">(${escape(item.subtext)})</span>` : ''}</div>`;
                     },
                     no_results: function() {
                         return `<div class="py-3 px-3 text-xs text-slate-500 bg-white">Tidak ada data ditemukan di spreadsheet.</div>`;

@@ -69,7 +69,21 @@ class RemoteDataProxyService
         $subtextCol = $config['column_subtext'] ?? $config['subtext_column'] ?? 'C';
 
         $valIdx = $this->resolveColumnIndex($valCol, $firstRow);
-        $labelIdx = $this->resolveColumnIndex($labelCol, $firstRow);
+
+        // Support single or multiple label columns (e.g. "C" or "B, C" or "B - C")
+        $labelCols = preg_split('/[,;\-]+/', (string)$labelCol, -1, PREG_SPLIT_NO_EMPTY);
+        $labelIndexes = [];
+        if (!empty($labelCols)) {
+            foreach ($labelCols as $colItem) {
+                $colItem = trim($colItem);
+                if ($colItem !== '') {
+                    $labelIndexes[] = $this->resolveColumnIndex($colItem, $firstRow);
+                }
+            }
+            $labelIndexes = array_values(array_unique($labelIndexes));
+        } else {
+            $labelIndexes = [$this->resolveColumnIndex($labelCol, $firstRow)];
+        }
 
         // Support single or multiple subtext columns (e.g. "B, D" or "B,D" or "B - D" or "NIM, Prodi")
         $subtextCols = preg_split('/[,;\-]+/', (string)$subtextCol, -1, PREG_SPLIT_NO_EMPTY);
@@ -94,7 +108,14 @@ class RemoteDataProxyService
         $items = [];
         foreach ($dataRows as $row) {
             $value = isset($row[$valIdx]) ? trim((string)$row[$valIdx]) : '';
-            $label = isset($row[$labelIdx]) ? trim((string)$row[$labelIdx]) : '';
+
+            $labelParts = [];
+            foreach ($labelIndexes as $lIdx) {
+                if (isset($row[$lIdx]) && trim((string)$row[$lIdx]) !== '') {
+                    $labelParts[] = trim((string)$row[$lIdx]);
+                }
+            }
+            $label = !empty($labelParts) ? implode(' - ', $labelParts) : '';
 
             $subtextParts = [];
             foreach ($subtextIndexes as $sIdx) {
