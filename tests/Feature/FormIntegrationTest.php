@@ -191,6 +191,9 @@ class FormIntegrationTest extends TestCase
 
         // Mock GoogleSheetService
         $mockSheetService = Mockery::mock(GoogleSheetService::class);
+        $mockSheetService->shouldReceive('ensureSheetTabExists')
+            ->andReturn(true);
+
         $mockSheetService->shouldReceive('fetchSheetRows')
             ->with($this->form->target_spreadsheet_id, $this->form->target_sheet_name, 'A1:Z1')
             ->andReturn([['Nama Mahasiswa', 'Program Studi']]);

@@ -114,6 +114,12 @@ class SyncToGoogleSheetJob implements ShouldQueue
         $user = ($form->user && $form->user->hasGoogleSheetsConnected()) ? $form->user : null;
 
         try {
+            // 1. Ensure sheet tab exists in target spreadsheet (creates tab if not present)
+            if (method_exists($sheetService, 'ensureSheetTabExists')) {
+                $sheetService->ensureSheetTabExists($spreadsheetId, $sheetName, $user);
+            }
+
+            // 2. Check if header row exists
             $existing = $user
                 ? $sheetService->fetchSheetRows($spreadsheetId, $sheetName, 'A1:Z1', $user)
                 : $sheetService->fetchSheetRows($spreadsheetId, $sheetName, 'A1:Z1');

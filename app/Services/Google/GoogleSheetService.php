@@ -8,6 +8,8 @@ use Exception;
 use Google\Client;
 use Google\Exception as GoogleApiClient;
 use Google\Service\Sheets;
+use Google\Service\Sheets\AddSheetRequest;
+use Google\Service\Sheets\BatchUpdateSpreadsheetRequest;
 use Google\Service\Sheets\Spreadsheet;
 use Google\Service\Sheets\ValueRange;
 use Illuminate\Support\Facades\Log;
@@ -255,6 +257,43 @@ class GoogleSheetService
                 $e->getMessage(),
                 $e
             );
+        }
+    }
+
+    /**
+     * Ensure a sheet (tab) exists in the spreadsheet. If not, create it.
+     */
+    public function ensureSheetTabExists(string $spreadsheetId, string $sheetName, ?User $user = null): bool
+    {
+        $service = $this->getServiceForUser($user);
+        $cleanSheetName = trim(str_replace("'", '', $sheetName));
+
+        try {
+            $spreadsheet = $service->spreadsheets->get($spreadsheetId);
+            $sheets = $spreadsheet->getSheets() ?: [];
+            foreach ($sheets as $sheet) {
+                if ($sheet->getProperties()?->getTitle() === $cleanSheetName) {
+                    return true;
+                }
+            }
+
+            // Tab doesn't exist, create it via batchUpdate
+            $addSheetRequest = new AddSheetRequest([
+                'properties' => [
+                    'title' => $cleanSheetName,
+                ],
+            ]);
+            $batchUpdateRequest = new BatchUpdateSpreadsheetRequest([
+                'requests' => [
+                    ['addSheet' => $addSheetRequest],
+                ],
+            ]);
+            $service->spreadsheets->batchUpdate($spreadsheetId, $batchUpdateRequest);
+            Log::info("Created new sheet tab '{$cleanSheetName}' in spreadsheet {$spreadsheetId}.");
+            return true;
+        } catch (Exception $e) {
+            Log::warning("ensureSheetTabExists notice: " . $e->getMessage());
+            return false;
         }
     }
 
