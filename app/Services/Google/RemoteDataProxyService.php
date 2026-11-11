@@ -68,7 +68,20 @@ class RemoteDataProxyService
         $labelCol = $config['column_label'] ?? $config['label_column'] ?? 'B';
         $subtextCol = $config['column_subtext'] ?? $config['subtext_column'] ?? 'C';
 
-        $valIdx = $this->resolveColumnIndex($valCol, $firstRow);
+        // Support single or multiple value columns (e.g. "B" or "C" or "B, C" or "B, C, D")
+        $valCols = preg_split('/[,;\-]+/', (string)$valCol, -1, PREG_SPLIT_NO_EMPTY);
+        $valIndexes = [];
+        if (!empty($valCols)) {
+            foreach ($valCols as $colItem) {
+                $colItem = trim($colItem);
+                if ($colItem !== '') {
+                    $valIndexes[] = $this->resolveColumnIndex($colItem, $firstRow);
+                }
+            }
+            $valIndexes = array_values(array_unique($valIndexes));
+        } else {
+            $valIndexes = [$this->resolveColumnIndex($valCol, $firstRow)];
+        }
 
         // Support single or multiple label columns (e.g. "C" or "B, C" or "B - C")
         $labelCols = preg_split('/[,;\-]+/', (string)$labelCol, -1, PREG_SPLIT_NO_EMPTY);
@@ -107,7 +120,13 @@ class RemoteDataProxyService
         // Transform rows to items
         $items = [];
         foreach ($dataRows as $row) {
-            $value = isset($row[$valIdx]) ? trim((string)$row[$valIdx]) : '';
+            $valParts = [];
+            foreach ($valIndexes as $vIdx) {
+                if (isset($row[$vIdx]) && trim((string)$row[$vIdx]) !== '') {
+                    $valParts[] = trim((string)$row[$vIdx]);
+                }
+            }
+            $value = !empty($valParts) ? implode(' - ', $valParts) : '';
 
             $labelParts = [];
             foreach ($labelIndexes as $lIdx) {
